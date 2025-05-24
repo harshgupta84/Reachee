@@ -7,8 +7,9 @@ This guide will help you set up real Instagram, Facebook, and YouTube API integr
 - ✅ **Instagram Basic Display API** - Real profile validation and follower data
 - ✅ **Facebook Graph API** - Page and profile information
 - ✅ **YouTube Data API v3** - Channel information, subscriber count, and video statistics
-- ✅ **OAuth 2.0 Flow** - Secure authentication for all three platforms
-- ✅ **Manual Entry Fallback** - For platforms without OAuth (Twitter, TikTok)
+- ✅ **LinkedIn Profile API** - Professional profile and connection data
+- ✅ **OAuth 2.0 Flow** - Secure authentication for all four platforms
+- ✅ **Manual Entry Fallback** - For platforms without OAuth (Twitter)
 - ✅ **Real-time Validation** - Verify accounts exist and get actual follower counts
 - ✅ **Access Token Management** - Store and refresh tokens for data updates
 
@@ -16,8 +17,10 @@ This guide will help you set up real Instagram, Facebook, and YouTube API integr
 
 1. Facebook Developer Account (for Instagram and Facebook)
 2. Google Cloud Console Account (for YouTube)
-3. Node.js and npm installed
-4. PostgreSQL database
+3. LinkedIn Developer Account (for LinkedIn)
+4. Twitter Developer Account (for Twitter/X)
+5. Node.js and npm installed
+6. PostgreSQL database
 
 ## 🔧 Setup Instructions
 
@@ -60,7 +63,48 @@ This guide will help you set up real Instagram, Facebook, and YouTube API integr
    - `https://yourdomain.com/api/auth/youtube/callback` (production)
 5. Note down your **Client ID** and **Client Secret**
 
-### 5. Add Products to Your Facebook App
+### 5. Create LinkedIn App
+
+1. Go to [LinkedIn Developers](https://www.linkedin.com/developers/)
+2. Click "Create App"
+3. Fill in your app details:
+   - **App Name**: "Reachee Social Connect"
+   - **LinkedIn Page**: Your company page (or create one)
+   - **Privacy Policy URL**: Your privacy policy
+   - **App Logo**: Upload your app logo
+4. Go to "Auth" tab
+5. Add redirect URIs:
+   - `http://localhost:3000/api/auth/linkedin/callback`
+   - `https://yourdomain.com/api/auth/linkedin/callback` (production)
+6. Request access to these products:
+   - **Sign In with LinkedIn** (for basic profile access)
+   - **Share on LinkedIn** (for connection data)
+7. Note down your **Client ID** and **Client Secret**
+
+### 6. Create Twitter Developer App
+
+1. Go to [Twitter Developer Portal](https://developer.twitter.com/)
+2. Apply for a developer account (if you don't have one)
+3. Create a new project and app:
+   - **Project Name**: "Reachee Social Connect"
+   - **App Name**: "Reachee"
+   - **App Description**: "Social media influencer analytics platform"
+4. Go to your app settings → "Keys and tokens"
+5. **Important:** Twitter API v2 uses OAuth 2.0 with PKCE (not basic auth)
+6. Set up OAuth 2.0 settings:
+   - **App permissions**: Read (for user profile and tweets)
+   - **Type of App**: Web App
+   - **Callback URI**: `http://localhost:3000/api/auth/twitter/callback`
+   - **Website URL**: Your app's website
+   - **Enable OAuth 2.0**: Make sure this is enabled
+7. Note down your **Client ID** (you don't need Client Secret for PKCE flow)
+8. **Optional:** Generate Bearer Token for app-only requests (not needed for user OAuth)
+
+**Note:** Twitter API v2 has two authentication methods:
+- **Bearer Token**: For app-only requests (public data)
+- **OAuth 2.0 + PKCE**: For user-context requests (what we use)
+
+### 7. Add Products to Your Facebook App
 
 #### Instagram Basic Display
 1. In your app dashboard, click "Add Product"
@@ -78,14 +122,14 @@ This guide will help you set up real Instagram, Facebook, and YouTube API integr
    - `http://localhost:3000/api/auth/facebook/callback`
    - `https://yourdomain.com/api/auth/facebook/callback` (production)
 
-### 6. Configure App Settings
+### 8. Configure App Settings
 
 1. Go to "Settings" → "Basic"
 2. Note down your **App ID** and **App Secret**
 3. Add your domain to "App Domains"
 4. Set "Privacy Policy URL" and "Terms of Service URL"
 
-### 7. Environment Variables
+### 9. Environment Variables
 
 Create a `.env.local` file in your project root:
 
@@ -106,12 +150,22 @@ GOOGLE_CLIENT_ID="your_google_client_id_here"
 GOOGLE_CLIENT_SECRET="your_google_client_secret_here"
 YOUTUBE_REDIRECT_URI="http://localhost:3000/api/auth/youtube/callback"
 
+# LinkedIn Credentials
+LINKEDIN_CLIENT_ID="your_linkedin_client_id_here"
+LINKEDIN_CLIENT_SECRET="your_linkedin_client_secret_here"
+LINKEDIN_REDIRECT_URI="http://localhost:3000/api/auth/linkedin/callback"
+
+# Twitter/X Credentials
+TWITTER_CLIENT_ID="your_twitter_client_id_here"
+# Note: Twitter API v2 with PKCE doesn't require client secret
+TWITTER_REDIRECT_URI="http://localhost:3000/api/auth/twitter/callback"
+
 # Next.js
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
 ```
 
-### 8. Database Schema Updates
+### 9. Database Schema Updates
 
 The Prisma schema already includes the necessary fields. Run:
 
@@ -140,8 +194,20 @@ npx prisma db push
 3. **Subscriber Count**: Gets real subscriber count and video statistics
 4. **Channel Data**: Stores channel info, custom URL, video count, view count, and thumbnails
 
+### Twitter Integration
+1. **OAuth Flow**: Uses Twitter API v2 with OAuth 2.0 authorization
+2. **User Profile**: Gets real follower count, tweet count, and profile information
+3. **Engagement Data**: Calculates engagement rates based on follower tiers
+4. **Verification Status**: Shows verified badge status and account type
+
+### LinkedIn Integration
+1. **OAuth Flow**: Uses LinkedIn OAuth 2.0 with professional profile scope
+2. **Profile Data**: Gets professional information and connection count
+3. **Company Pages**: Detects and connects company pages for businesses
+4. **Network Analysis**: Analyzes professional network and industry connections
+
 ### Manual Entry Fallback
-- For platforms without OAuth (Twitter, TikTok)
+- For platforms without OAuth configured
 - Basic username validation
 - Manual follower count entry
 - Marked as "Manual" vs "Verified"
@@ -167,8 +233,8 @@ npx prisma db push
 | Instagram | ✅ Ready | ✅ Yes | ✅ Yes | Basic Display API |
 | Facebook | ✅ Ready | ✅ Yes | ✅ Yes | Graph API for Pages |
 | YouTube | ✅ Ready | ✅ Yes | ✅ Yes | Data API v3 for Channels |
-| Twitter | 🔄 Planned | ❌ No | ❌ No | Manual entry only |
-| TikTok | 🔄 Planned | ❌ No | ❌ No | Manual entry only |
+| Twitter | ✅ Ready | ✅ Yes | ✅ Yes | OAuth 2.0 authorization |
+| LinkedIn | ✅ Ready | ✅ Yes | ✅ Yes | Professional profile and connection data |
 
 ## 🚧 Testing
 
@@ -210,12 +276,12 @@ npx prisma db push
 
 ## 🔮 Future Enhancements
 
-- **Twitter API v2** integration  
-- **TikTok for Developers API** (when available)
 - **Automatic data refresh** with cron jobs
 - **Analytics integration** with real engagement metrics
 - **Webhook support** for real-time updates
 - **Advanced YouTube metrics** (watch time, demographics)
+- **TikTok API integration** (when available)
+- **Advanced LinkedIn company analytics**
 
 ## 📞 Support
 

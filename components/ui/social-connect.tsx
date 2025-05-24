@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Instagram, Youtube, Twitter, Facebook, Plus, RefreshCw, ExternalLink, TrendingUp, Shield, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Instagram, Youtube, Twitter, Facebook, Plus, RefreshCw, ExternalLink, TrendingUp, Shield, CheckCircle2, AlertCircle, Linkedin } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,14 +34,14 @@ const socialPlatforms = [
     supportsOAuth: true,
   },
   {
-    name: 'TikTok',
-    icon: () => <div className="h-5 w-5 bg-black rounded-full flex items-center justify-center text-white text-xs font-bold">T</div>,
-    color: 'text-black',
-    bgColor: 'bg-gray-50',
-    placeholder: '@username',
-    urlTemplate: 'https://tiktok.com/@',
-    description: 'Connect your TikTok account to feature your short-form videos',
-    supportsOAuth: false,
+    name: 'LinkedIn',
+    icon: Linkedin,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    placeholder: '@username or profile URL',
+    urlTemplate: 'https://linkedin.com/in/',
+    description: 'Connect your LinkedIn profile to showcase your professional network',
+    supportsOAuth: true,
   },
   {
     name: 'Twitter',
@@ -51,12 +51,12 @@ const socialPlatforms = [
     placeholder: '@username',
     urlTemplate: 'https://twitter.com/',
     description: 'Connect your Twitter/X account to show your tweets and engagement',
-    supportsOAuth: false,
+    supportsOAuth: true,
   },
   {
     name: 'Facebook',
     icon: Facebook,
-    color: 'text-blue-600',
+    color: 'text-blue-700',
     bgColor: 'bg-blue-50',
     placeholder: '@username or page URL',
     urlTemplate: 'https://facebook.com/',
@@ -141,6 +141,32 @@ export default function SocialConnect({
         } catch (error) {
           toast.error('Failed to process YouTube connection');
         }
+      }
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard?tab=profile');
+    }
+
+    // Handle LinkedIn connection
+    const linkedinAccount = urlParams.get('linkedin_account');
+    if (linkedinAccount) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(linkedinAccount));
+        handleOAuthSuccess('LinkedIn', parsed);
+      } catch (error) {
+        toast.error('Failed to process LinkedIn connection');
+      }
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard?tab=profile');
+    }
+
+    // Handle Twitter connection
+    const twitterAccount = urlParams.get('twitter_account');
+    if (twitterAccount) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(twitterAccount));
+        handleOAuthSuccess('Twitter', parsed);
+      } catch (error) {
+        toast.error('Failed to process Twitter connection');
       }
       // Clean up URL
       window.history.replaceState({}, '', '/dashboard?tab=profile');
@@ -437,36 +463,50 @@ export default function SocialConnect({
               
               <CardContent className="space-y-3">
                 <div>
-                  <p className="font-medium">@{platform.username}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">@{platform.username}</p>
                   <a 
                     href={platform.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                   >
                     View Profile
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
                 
-                <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium">Followers</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {platform.platform === 'YouTube' ? 'Subscribers' : 
+                       platform.platform === 'LinkedIn' ? 'Connections' : 'Followers'}
+                    </span>
                   </div>
-                  <span className="font-bold text-lg">{formatFollowerCount(platform.followers)}</span>
+                  <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                    {formatFollowerCount(platform.followers)}
+                  </span>
                 </div>
                 
                 {hasRealData && platform.profileData && (
-                  <div className="text-xs text-gray-600 space-y-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                     {platform.profileData.accountType && (
-                      <div>Type: {platform.profileData.accountType}</div>
+                      <div>Type: <span className="font-medium">{platform.profileData.accountType}</span></div>
                     )}
                     {platform.profileData.mediaCount && (
-                      <div>Posts: {platform.profileData.mediaCount}</div>
+                      <div>Posts: <span className="font-medium">{platform.profileData.mediaCount}</span></div>
+                    )}
+                    {platform.profileData.videoCount && (
+                      <div>Videos: <span className="font-medium">{platform.profileData.videoCount}</span></div>
                     )}
                     {platform.profileData.category && (
-                      <div>Category: {platform.profileData.category}</div>
+                      <div>Category: <span className="font-medium">{platform.profileData.category}</span></div>
+                    )}
+                    {platform.profileData.verified && (
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                        <span className="text-blue-600 dark:text-blue-400 font-medium">Verified Account</span>
+                      </div>
                     )}
                   </div>
                 )}

@@ -67,6 +67,12 @@ export async function GET(request: NextRequest) {
       case 'youtube':
         authUrl = SocialMediaValidator.generateYouTubeOAuthUrl();
         break;
+      case 'linkedin':
+        authUrl = SocialMediaValidator.generateLinkedInOAuthUrl();
+        break;
+      case 'twitter':
+        authUrl = SocialMediaValidator.generateTwitterOAuthUrl();
+        break;
       default:
         return NextResponse.json(
           { error: `OAuth not implemented for ${platform}` },

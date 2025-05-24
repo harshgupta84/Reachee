@@ -13,8 +13,13 @@ const connectSocialSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 Social connect API called');
+    
     const body = await request.json();
+    console.log('📝 Request body:', JSON.stringify(body, null, 2));
+    
     const validatedData = connectSocialSchema.parse(body);
+    console.log('✅ Data validation passed');
     
     const {
       userId,
@@ -25,25 +30,38 @@ export async function POST(request: NextRequest) {
       profileData,
     } = validatedData;
 
-    // Get the influencer profile
-    const influencerProfile = await prisma.influencerProfile.findUnique({
+    console.log(`🔍 Looking for influencer profile with userId: ${userId}`);
+    
+    let influencerProfile = await prisma.influencerProfile.findUnique({
       where: { userId },
     });
 
+    console.log('👤 Influencer profile found:', influencerProfile ? 'Yes' : 'No');
+
     if (!influencerProfile) {
-      return NextResponse.json(
-        { error: 'Influencer profile not found' },
-        { status: 404 }
-      );
+      console.log('🔧 Creating missing influencer profile');
+      influencerProfile = await prisma.influencerProfile.create({
+        data: {
+          userId,
+          bio: '',
+          location: '',
+          categories: [],
+          profileComplete: false,
+        },
+      });
+      console.log('✅ Influencer profile created');
     }
 
-    // Check if platform already exists
+    console.log(`🔍 Checking for existing platform: ${platform}`);
+    
     const existingPlatform = await prisma.socialPlatform.findFirst({
       where: {
         influencerProfileId: influencerProfile.id,
         platform,
       },
     });
+
+    console.log('🔄 Existing platform found:', existingPlatform ? 'Yes' : 'No');
 
     const platformData = {
       platform,
@@ -54,14 +72,16 @@ export async function POST(request: NextRequest) {
       ...(profileData && { profileData }),
     };
 
+    console.log('📊 Platform data to save:', JSON.stringify(platformData, null, 2));
+
     if (existingPlatform) {
-      // Update existing platform
+      console.log('🔄 Updating existing platform');
       await prisma.socialPlatform.update({
         where: { id: existingPlatform.id },
         data: platformData,
       });
     } else {
-      // Create new platform connection
+      console.log('➕ Creating new platform connection');
       await prisma.socialPlatform.create({
         data: {
           ...platformData,
@@ -70,12 +90,19 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    console.log('✅ Platform connection successful');
     return NextResponse.json({ success: true });
     
   } catch (error) {
-    console.error('Error connecting social platform:', error);
+    console.error('❌ Error connecting social platform:', error);
+    console.error('📍 Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
     
     if (error instanceof z.ZodError) {
+      console.log('🔍 Zod validation error:', error.errors);
       return NextResponse.json(
         { error: 'Invalid input data', details: error.errors },
         { status: 400 }

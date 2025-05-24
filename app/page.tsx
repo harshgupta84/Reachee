@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center">
       <section className="w-full py-20 md:py-32">
-        <div className="container flex flex-col items-center text-center">
+        <div className="flex flex-col items-center text-center">
           <h1 className="max-w-4xl text-3xl font-bold tracking-tighter md:text-5xl lg:text-6xl">
             Connect Brands and Influencers for Successful Collaborations
           </h1>
@@ -40,7 +40,7 @@ export default function Home() {
       </section>
 
       <section className="w-full py-16 md:py-24">
-        <div className="container flex flex-col items-center gap-4 text-center">
+        <div className="flex flex-col items-center gap-4 text-center">
           <h2 className="text-2xl font-bold tracking-tighter md:text-4xl">How It Works</h2>
           <p className="mx-auto max-w-[700px] text-muted-foreground">
             Our platform makes it easy to find and manage partnerships.
@@ -78,7 +78,7 @@ export default function Home() {
       </section>
 
       <section className="w-full bg-muted/50 py-16 md:py-24">
-        <div className="container flex flex-col items-center gap-4 text-center">
+        <div className="flex flex-col items-center gap-4 text-center">
           <h2 className="text-2xl font-bold tracking-tighter md:text-4xl">Ready to Get Started?</h2>
           <p className="mx-auto max-w-[700px] text-muted-foreground">
             Join thousands of brands and influencers already collaborating on Reachee.

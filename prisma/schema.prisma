@@ -77,6 +77,8 @@ model SocialPlatform {
   username          String
   url               String
   followers         Int
+  accessToken       String?
+  profileData       Json?
   influencerProfileId String           
 
   influencerProfile InfluencerProfile  @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)

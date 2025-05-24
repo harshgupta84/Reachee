@@ -67,7 +67,7 @@ export default function CampaignsPage() {
   // Show loading skeletons
   if (isLoading) {
     return (
-      <div className="container py-10">
+      <div className="py-10">
         <div className="mb-8 space-y-2">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-4 w-full max-w-md" />
@@ -91,7 +91,7 @@ export default function CampaignsPage() {
   // Show error message
   if (error) {
     return (
-      <div className="container flex h-[50vh] flex-col items-center justify-center py-10">
+      <div className="flex h-[50vh] flex-col items-center justify-center py-10">
         <p className="text-center text-lg text-destructive">{error}</p>
         <button 
           onClick={() => window.location.reload()}
@@ -106,14 +106,14 @@ export default function CampaignsPage() {
   // Show empty state
   if (campaigns.length === 0) {
     return (
-      <div className="container flex h-[50vh] flex-col items-center justify-center py-10">
+      <div className="flex h-[50vh] flex-col items-center justify-center py-10">
         <p className="text-center text-lg">No campaigns found.</p>
       </div>
     );
   }
 
   return (
-    <div className="container py-10">
+    <div className="py-10">
       <div className="mb-8 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
         <p className="text-muted-foreground">

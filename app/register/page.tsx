@@ -90,7 +90,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container flex min-h-screen items-center justify-center py-10">
+    <div className="flex min-h-screen items-center justify-center py-10">
       <Card className="mx-auto w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Join Reachee</CardTitle>
