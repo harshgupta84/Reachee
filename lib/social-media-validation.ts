@@ -304,6 +304,9 @@ export class SocialMediaValidator {
 
       const channel: YouTubeChannelInfo = channelData.items[0];
 
+      // Get enhanced analytics data
+      const analytics = await this.getYouTubeAnalytics(accessToken, channel.id);
+
       const account: SocialMediaAccount = {
         platform: 'YouTube',
         username: channel.snippet.customUrl || channel.snippet.title,
@@ -321,7 +324,12 @@ export class SocialMediaValidator {
           videoCount: parseInt(channel.statistics.videoCount) || 0,
           viewCount: parseInt(channel.statistics.viewCount) || 0,
           subscriberCount: parseInt(channel.statistics.subscriberCount) || 0,
-          keywords: channel.brandingSettings?.channel?.keywords
+          keywords: channel.brandingSettings?.channel?.keywords,
+          // Enhanced analytics data
+          engagementRate: analytics.engagementRate,
+          avgViewsPerVideo: analytics.avgViewsPerVideo,
+          recentVideos: analytics.recentVideos,
+          channelAnalytics: analytics.channelAnalytics
         }
       };
 
@@ -541,7 +549,7 @@ export class SocialMediaValidator {
   static generateYouTubeOAuthUrl(): string {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const redirectUri = process.env.YOUTUBE_REDIRECT_URI || 'http://localhost:3000/api/auth/youtube/callback';
-    const scope = 'https://www.googleapis.com/auth/youtube.readonly';
+    const scope = 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly';
     
     const params = new URLSearchParams({
       client_id: clientId || '',
@@ -890,6 +898,106 @@ export class SocialMediaValidator {
       }
     } catch (error) {
       return false;
+    }
+  }
+
+  /**
+   * Enhanced YouTube Analytics - Get detailed video and channel analytics
+   */
+  static async getYouTubeAnalytics(accessToken: string, channelId: string): Promise<{
+    recentVideos: any[];
+    channelAnalytics: any;
+    engagementRate: number;
+    avgViewsPerVideo: number;
+  }> {
+    try {
+      // 1. Get recent videos (last 10 videos)
+      const videosResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=10&key=${process.env.YOUTUBE_API_KEY}`
+      );
+
+      if (!videosResponse.ok) {
+        throw new Error('Failed to fetch recent videos');
+      }
+
+      const videosData = await videosResponse.json();
+      const videoIds = videosData.items?.map((item: any) => item.id.videoId).join(',') || '';
+
+      // 2. Get detailed video statistics for recent videos
+      let videoStats = [];
+      if (videoIds) {
+        const statsResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${process.env.YOUTUBE_API_KEY}`
+        );
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          videoStats = statsData.items || [];
+        }
+      }
+
+      // 3. Calculate real engagement metrics
+      const recentVideos = videosData.items?.map((video: any, index: number) => {
+        const stats = videoStats[index]?.statistics || {};
+        const contentDetails = videoStats[index]?.contentDetails || {};
+        
+        const views = parseInt(stats.viewCount) || 0;
+        const likes = parseInt(stats.likeCount) || 0;
+        const comments = parseInt(stats.commentCount) || 0;
+        
+        // Calculate engagement rate for this video
+        const engagementRate = views > 0 ? ((likes + comments) / views) * 100 : 0;
+
+        return {
+          videoId: video.id.videoId,
+          title: video.snippet.title,
+          publishedAt: video.snippet.publishedAt,
+          thumbnail: video.snippet.thumbnails.medium?.url,
+          views,
+          likes,
+          comments,
+          duration: contentDetails.duration,
+          engagementRate: Math.round(engagementRate * 100) / 100
+        };
+      }) || [];
+
+      // 4. Calculate channel-wide metrics
+      const totalViews = recentVideos.reduce((sum: number, video: any) => sum + video.views, 0);
+      const totalEngagements = recentVideos.reduce((sum: number, video: any) => sum + video.likes + video.comments, 0);
+      const avgViewsPerVideo = recentVideos.length > 0 ? Math.round(totalViews / recentVideos.length) : 0;
+      const overallEngagementRate = totalViews > 0 ? (totalEngagements / totalViews) * 100 : 0;
+
+      // 5. Try to get YouTube Analytics data (requires additional permission)
+      let channelAnalytics = null;
+      try {
+        // This requires YouTube Analytics API and additional OAuth scopes
+        const analyticsResponse = await fetch(
+          `https://youtubeanalytics.googleapis.com/v2/reports?ids=channel==${channelId}&startDate=2024-01-01&endDate=2024-12-31&metrics=views,estimatedMinutesWatched,averageViewDuration,subscribersGained&dimensions=day&sort=day&access_token=${accessToken}`
+        );
+
+        if (analyticsResponse.ok) {
+          channelAnalytics = await analyticsResponse.json();
+        }
+      } catch (error) {
+        // Analytics API might not be available
+        console.log('YouTube Analytics API not available');
+      }
+
+      return {
+        recentVideos,
+        channelAnalytics,
+        engagementRate: Math.round(overallEngagementRate * 100) / 100,
+        avgViewsPerVideo
+      };
+
+    } catch (error) {
+      console.error('YouTube analytics fetch error:', error);
+      return {
+        recentVideos: [],
+        channelAnalytics: null,
+        engagementRate: 0,
+        avgViewsPerVideo: 0
+      };
     }
   }
 } 

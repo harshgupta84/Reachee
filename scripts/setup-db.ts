@@ -17,12 +17,8 @@ async function main() {
     await execAsync('npx prisma generate');
     console.log('Prisma client generated successfully!');
     
-    // Seed the database
-    console.log('Seeding database with initial data...');
-    await execAsync('npm run seed');
-    console.log('Database seeded successfully!');
-    
     console.log('Database setup completed successfully!');
+    console.log('Note: The analytics page will generate mock data dynamically based on actual influencer profiles.');
     process.exit(0);
   } catch (error) {
     console.error('Error setting up database:', error);

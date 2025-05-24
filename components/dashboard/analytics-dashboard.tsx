@@ -46,12 +46,21 @@ import {
   Twitter,
   Facebook,
   Linkedin,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Share2,
+  Instagram,
+  Globe,
+  Star,
+  ArrowUp,
+  ArrowDown,
+  Minus
 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { AnalyticsEngine } from '@/lib/analytics-engine';
 
 interface AnalyticsDashboardProps {
@@ -88,7 +97,6 @@ export default function AnalyticsDashboard({ profileData, onNavigateToProfile }:
   const [analytics, setAnalytics] = useState<any>(null);
   const [timeSeriesData, setTimeSeriesData] = useState<any[]>([]);
   const [platformData, setPlatformData] = useState<any[]>([]);
-  const [selectedMetric, setSelectedMetric] = useState('followers');
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -337,22 +345,6 @@ export default function AnalyticsDashboard({ profileData, onNavigateToProfile }:
     }
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border rounded-lg shadow-lg">
-          <p className="font-medium">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }}>
-              {`${entry.dataKey}: ${entry.value.toLocaleString()}`}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="space-y-6">
       {/* Real Platform Insights - NEW SECTION */}
@@ -489,9 +481,9 @@ export default function AnalyticsDashboard({ profileData, onNavigateToProfile }:
 
       {/* Key Metrics Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expected ROI</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-800">Expected ROI</CardTitle>
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -502,94 +494,150 @@ export default function AnalyticsDashboard({ profileData, onNavigateToProfile }:
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Engagement Score</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">Engagement Score</CardTitle>
             <Heart className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-900">{analytics.engagement.overallScore}%</div>
-            <p className="text-xs text-green-700">
+            <p className="text-xs text-green-700 font-medium">
               Quality: {analytics.engagement.audienceQuality.toFixed(1)}%
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Growth Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-purple-800">Growth Rate</CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-900">
               +{analytics.growth.followerGrowthRate}%
             </div>
-            <p className="text-xs text-purple-700">
+            <p className="text-xs text-purple-700 font-medium">
               {analytics.growth.growthTrend}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Brand Value</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-800">Brand Value</CardTitle>
             <Award className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-900">
-              {analytics.roi.brandValueScore.toFixed(1)}
+              {isFinite(analytics.roi.brandValueScore) ? analytics.roi.brandValueScore.toFixed(1) : '0.0'}
             </div>
-            <p className="text-xs text-orange-700">
+            <p className="text-xs text-orange-700 font-medium">
               Market Rank: {analytics.market.competitorRanking}%
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Time Series Chart */}
-      <Card>
+      {/* Reachee Score Section */}
+      <Card className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 shadow-lg">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Performance Trends
-              </CardTitle>
-              <CardDescription>30-day social media metrics overview</CardDescription>
+          <CardTitle className="flex items-center gap-3 text-2xl text-indigo-900">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <div className="flex gap-2">
-              {['followers', 'engagement', 'reach', 'impressions'].map(metric => (
-                <Button
-                  key={metric}
-                  variant={selectedMetric === metric ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedMetric(metric)}
-                  className="capitalize"
-                >
-                  {metric}
-                </Button>
-              ))}
+            Reachee Score
+            <Badge variant="outline" className="bg-white border-indigo-300 text-indigo-700 font-semibold">
+              Platform KPI
+            </Badge>
+          </CardTitle>
+          <CardDescription className="text-base text-indigo-700">
+            Your comprehensive influencer performance rating based on reach, engagement, growth, and market value
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Main Score Display */}
+            <div className="md:col-span-1 text-center p-6 bg-white/90 rounded-xl border border-indigo-200 shadow-sm">
+              <div className="text-6xl font-bold bg-gradient-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                {analytics.reacheeScore.overall}
+              </div>
+              <div className="text-lg font-semibold text-indigo-800 mb-1">
+                {analytics.reacheeScore.rating}
+              </div>
+              <div className="text-sm text-gray-700 font-medium">
+                Top {100 - analytics.reacheeScore.percentileRank}% of influencers
+              </div>
+            </div>
+
+            {/* Score Breakdown */}
+            <div className="md:col-span-2 space-y-3">
+              {Object.entries(analytics.reacheeScore.breakdown).map(([key, value]) => {
+                const numValue = value as number;
+                return (
+                  <div key={key} className="flex items-center gap-3">
+                    <div className="w-20 text-sm font-semibold capitalize text-gray-800">
+                      {key === 'marketValue' ? 'Market' : key}
+                    </div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 shadow-sm ${
+                          numValue >= 80 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                          numValue >= 60 ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
+                          numValue >= 40 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                          'bg-gradient-to-r from-red-400 to-red-600'
+                        }`}
+                        style={{ width: `${numValue}%` }}
+                      />
+                    </div>
+                    <div className="w-12 text-sm font-bold text-right text-gray-800">
+                      {numValue}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={timeSeriesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey={selectedMetric}
-                stroke={COLORS.primary}
-                fill={COLORS.primary}
-                fillOpacity={0.6}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+
+          {/* Insights */}
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Strengths */}
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200 shadow-sm">
+              <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Key Strengths
+              </h4>
+              <ul className="space-y-2">
+                {analytics.reacheeScore.strengths.map((strength: string, index: number) => (
+                  <li key={index} className="text-sm text-green-800 flex items-start gap-2 font-medium">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
+                    {strength}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Improvements */}
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
+              <h4 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Growth Opportunities
+              </h4>
+              <ul className="space-y-2">
+                {analytics.reacheeScore.improvements.map((improvement: string, index: number) => (
+                  <li key={index} className="text-sm text-blue-800 flex items-start gap-2 font-medium">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                    {improvement}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Time Series Chart */}
+      {/* Removed: Performance Trends chart because it shows mock data instead of real historical analytics data */}
+      {/* Will only be shown when actual historical data tracking is implemented */}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Platform Performance */}
@@ -695,41 +743,8 @@ export default function AnalyticsDashboard({ profileData, onNavigateToProfile }:
       </div>
 
       {/* Performance Radar Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            Performance Matrix
-          </CardTitle>
-          <CardDescription>Comprehensive performance analysis across key metrics</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <RadarChart
-              data={[
-                { metric: 'Reach Efficiency', value: analytics.performance.reachEfficiency },
-                { metric: 'Content Quality', value: analytics.performance.contentQualityScore },
-                { metric: 'Audience Alignment', value: analytics.performance.audienceAlignment },
-                { metric: 'Brand Safety', value: analytics.performance.brandSafety },
-                { metric: 'Viral Potential', value: analytics.performance.viralPotential },
-                { metric: 'Cross-Platform Synergy', value: analytics.market.crossPlatformSynergy }
-              ]}
-            >
-              <PolarGrid />
-              <PolarAngleAxis dataKey="metric" />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} />
-              <Radar
-                name="Performance"
-                dataKey="value"
-                stroke={COLORS.primary}
-                fill={COLORS.primary}
-                fillOpacity={0.3}
-              />
-              <Tooltip />
-            </RadarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {/* Removed: Performance Matrix chart because it shows calculated/simulated data using Math.random() instead of real performance tracking */}
+      {/* These metrics would need actual campaign tracking, content analysis, and brand safety monitoring to be meaningful */}
 
       {/* Predictions & Insights */}
       <div className="grid gap-6 md:grid-cols-2">

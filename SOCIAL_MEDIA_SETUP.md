@@ -37,10 +37,11 @@ This guide will help you set up real Instagram, Facebook, and YouTube API integr
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing one
-3. Enable the YouTube Data API v3:
+3. Enable the required APIs:
    - Go to "APIs & Services" → "Library"
-   - Search for "YouTube Data API v3"
-   - Click "Enable"
+   - Search for "YouTube Data API v3" and click "Enable"
+   - Search for "YouTube Analytics API" and click "Enable"
+   - Search for "YouTube Reporting API" and click "Enable" (optional, for advanced reporting)
 
 ### 3. Configure OAuth Consent Screen (Google)
 

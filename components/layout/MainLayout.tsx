@@ -30,14 +30,6 @@ export function MainLayout({ children }: MainLayoutProps) {
               </Link>
               <nav className="hidden gap-6 md:flex">
                 <Link
-                  href="/campaigns"
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    isActive('/campaigns') ? 'text-foreground' : 'text-muted-foreground'
-                  }`}
-                >
-                  Campaigns
-                </Link>
-                <Link
                   href="/influencers"
                   className={`text-sm font-medium transition-colors hover:text-primary ${
                     isActive('/influencers') ? 'text-foreground' : 'text-muted-foreground'

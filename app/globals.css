@@ -141,4 +141,39 @@
   .grid-responsive {
     @apply grid gap-4 sm:gap-6 lg:gap-8;
   }
+
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Influencer specific utilities */
+  .influencer-card {
+    @apply transition-all duration-200 hover:shadow-lg hover:scale-[1.02];
+  }
+
+  .platform-icon {
+    @apply w-4 h-4 text-muted-foreground;
+  }
+
+  .metric-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
 }
