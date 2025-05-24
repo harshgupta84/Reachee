@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Users, Building2, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -14,11 +15,25 @@ export default function Home() {
             partnerships that drive results.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button size="lg" asChild>
-              <Link href="/register">Get Started</Link>
+            <Button size="lg" asChild className="bg-primary hover:bg-primary/90">
+              <Link href="/register" className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Join as Influencer
+              </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/campaigns">Browse Campaigns</Link>
+            <Button size="lg" variant="outline" asChild className="border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:border-orange-300">
+              <Link href="/register" className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Want to Sponsor?
+              </Link>
+            </Button>
+          </div>
+          <div className="mt-4">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/campaigns" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                Browse Campaigns
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -68,9 +83,18 @@ export default function Home() {
           <p className="mx-auto max-w-[700px] text-muted-foreground">
             Join thousands of brands and influencers already collaborating on Reachee.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <Button size="lg" asChild>
-              <Link href="/register">Create Your Account</Link>
+              <Link href="/register" className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Join as Influencer
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100">
+              <Link href="/register" className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Start Sponsoring
+              </Link>
             </Button>
           </div>
         </div>

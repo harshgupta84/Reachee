@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reachee - Influencer Marketing Platform
 
-## Getting Started
+A simplified, modern platform connecting brands with influencers for successful collaborations.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **User Authentication** - Secure registration and login with database integration
+- **Role-based Onboarding** - Simplified forms for influencers and brands
+- **Dashboard** - Personalized experience based on user type
+- **Campaign Management** - Create and browse campaigns
+- **Real-time Messaging** - Connect brands with influencers
+
+## 🚀 Tech Stack
+
+- **Frontend**: Next.js 15, React, TypeScript
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **UI**: Tailwind CSS, shadcn/ui components
+- **Authentication**: Custom auth with bcrypt
+- **State Management**: Zustand
+- **Forms**: React Hook Form with Zod validation
+
+## 🛠️ Recent Improvements
+
+### Simplified & Refactored
+- ✅ **Removed complex multi-step forms** - Single page onboarding
+- ✅ **Eliminated unnecessary dependencies** - No more react-select, country-state-city
+- ✅ **Simplified validation** - Clean react-hook-form integration
+- ✅ **Database integration** - Real authentication instead of mock data
+- ✅ **Cleaner codebase** - Removed unused hooks and components
+
+### Authentication System
+- ✅ **User Registration** - Creates account with hashed password
+- ✅ **User Login** - Database verification with proper redirects
+- ✅ **Profile Creation** - Saves influencer/brand data to database
+- ✅ **Role-based Flow** - Automatic redirection based on profile completion
+
+## 📁 Project Structure
+
+```
+app/
+├── api/auth/          # Authentication endpoints
+├── login/             # Login page
+├── register/          # Registration page
+├── influencer/        # Influencer onboarding
+├── brand/             # Brand onboarding
+└── dashboard/         # Main dashboard
+
+components/
+├── ui/                # Reusable UI components
+├── layout/            # Layout components
+└── shared/            # Shared business components
+
+lib/
+├── db.ts              # Prisma client
+└── utils.ts           # Utility functions
+
+stores/
+└── useAuthStore.ts    # Authentication state
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Getting Started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd reachee
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Update DATABASE_URL and other variables
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Set up the database**
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+6. **Visit** http://localhost:3000
 
-## Deploy on Vercel
+## 📝 Usage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Register** as either an Influencer or Brand
+2. **Complete onboarding** with simplified single-page forms
+3. **Access dashboard** based on your role
+4. **Create campaigns** (brands) or **browse opportunities** (influencers)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 Development
+
+- **Database**: PostgreSQL with Prisma ORM
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Forms**: React Hook Form with Zod validation
+- **State**: Zustand for client state management
+
+## 📦 Key Dependencies
+
+- `next` - React framework
+- `prisma` - Database ORM
+- `react-hook-form` - Form handling
+- `zod` - Schema validation
+- `tailwindcss` - Styling
+- `zustand` - State management
+- `bcrypt` - Password hashing
+
+## 🎯 Next Steps
+
+- [ ] Add email verification
+- [ ] Implement file upload for profiles
+- [ ] Add search and filtering
+- [ ] Enhance messaging system
+- [ ] Add campaign analytics
+- [ ] Payment integration
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+---
+
+**Built with ❤️ for the influencer marketing community**

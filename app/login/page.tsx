@@ -37,22 +37,40 @@ export default function LoginPage() {
   const onSubmit = async (values: LoginValues) => {
     setIsLoading(true);
     try {
-      // Mock login - In a real app, this would be an API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock user for demonstration
-      setUser({
-        id: '1',
-        name: 'User',
-        email: values.email,
-        role: 'INFLUENCER',
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Set user data from API response
+      setUser(data.user);
       setAuthenticated(true);
       
       toast.success('Logged in successfully!');
-      router.push('/dashboard');
+      
+      // Redirect based on user role and profile completion
+      if (data.user.role === 'INFLUENCER') {
+        // Check if influencer profile is complete
+        const isProfileComplete = data.user.influencerProfile?.profileComplete;
+        router.push(isProfileComplete ? '/dashboard' : '/influencer/onboarding');
+      } else if (data.user.role === 'BRAND') {
+        // Check if brand profile is complete
+        const isProfileComplete = data.user.brandProfile?.profileComplete;
+        router.push(isProfileComplete ? '/dashboard' : '/brand/onboarding');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error) {
-      toast.error('Invalid login credentials');
+      toast.error(error instanceof Error ? error.message : 'Invalid login credentials');
       console.error(error);
     } finally {
       setIsLoading(false);
