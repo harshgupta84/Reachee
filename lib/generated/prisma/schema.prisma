@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  influencerProfile InfluencerProfile?
+  brandProfile      BrandProfile?
+  accounts          Account[]
+  campaigns         Campaign[]         @relation("CampaignCreator")
+  applications      Application[]
+
+  // Many-to-many relation with conversations
+  conversationIds String[]       @db.ObjectId
+  conversations   Conversation[] @relation(fields: [conversationIds], references: [id])
+
+  messages Message[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model InfluencerProfile {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String           @unique @db.ObjectId
+  bio             String?
+  location        String?
+  categories      String[]
+  socialPlatforms SocialPlatform[]
+  metrics         Metrics?
+  profileComplete Boolean          @default(false)
+  verified        Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+}
+
+model SocialPlatform {
+  id                  String @id @default(auto()) @map("_id") @db.ObjectId
+  platform            String
+  username            String
+  url                 String
+  followers           Int
+  influencerProfileId String @db.ObjectId
+
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model Metrics {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  averageEngagement    Float?
+  audienceDemographics Json?
+  contentCategories    String[]
+  influencerProfileId  String   @unique @db.ObjectId
+
+  influencerProfile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model BrandProfile {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @unique @db.ObjectId
+  companyName     String
+  website         String?
+  industry        String?
+  logo            String?
+  description     String?
+  profileComplete Boolean  @default(false)
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  requirements String
+  budget       Float
+  deadline     DateTime
+  status       String   @default("OPEN") // OPEN, CLOSED, COMPLETED
+  platforms    String[]
+  categories   String[]
+  creatorId    String   @db.ObjectId
+  brandId      String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  creator      User          @relation("CampaignCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  brand        BrandProfile  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  applications Application[]
+}
+
+model Application {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  status       String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  proposal     String
+  rate         Float
+  campaignId   String   @db.ObjectId
+  influencerId String   @db.ObjectId
+  userId       String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  campaign   Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  user       User              @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Many-to-many relation with users
+  participantIds String[] @db.ObjectId
+  participants   User[]   @relation(fields: [participantIds], references: [id])
+
+  messages Message[]
+}
+
+model Message {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  content        String
+  senderId       String   @db.ObjectId
+  conversationId String   @db.ObjectId
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}

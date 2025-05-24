@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  influencerProfile InfluencerProfile?
+  brandProfile      BrandProfile?
+  accounts          Account[]
+  campaigns         Campaign[]       
+  applications      Application[]
+  
+  // Many-to-many relation with conversations
+  conversations   Conversation[] @relation("UserToConversation")
+  
+  messages          Message[]
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model InfluencerProfile {
+  id                String               @id @default(uuid())
+  userId            String               @unique
+  bio               String?
+  location          String?
+  categories        String[]
+  socialPlatforms   SocialPlatform[]
+  metrics           Metrics?
+  profileComplete   Boolean              @default(false)
+  verified          Boolean              @default(false)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications      Application[]
+}
+
+model SocialPlatform {
+  id                String             @id @default(uuid())
+  platform          String
+  username          String
+  url               String
+  followers         Int
+  influencerProfileId String           
+
+  influencerProfile InfluencerProfile  @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model Metrics {
+  id                  String             @id @default(uuid())
+  averageEngagement   Float?
+  audienceDemographics Json?
+  contentCategories   String[]
+  influencerProfileId String             @unique
+  
+  influencerProfile   InfluencerProfile  @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+}
+
+model BrandProfile {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  companyName     String
+  website         String?
+  industry        String?
+  logo            String?
+  description     String?
+  profileComplete Boolean      @default(false)
+  verified        Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns       Campaign[]
+}
+
+model Campaign {
+  id              String        @id @default(uuid())
+  title           String
+  description     String
+  requirements    String
+  budget          Float
+  deadline        DateTime
+  status          String        @default("OPEN") // OPEN, CLOSED, COMPLETED
+  platforms       String[]
+  categories      String[]
+  creatorId       String
+  brandId         String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  creator         User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  brand           BrandProfile  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  applications    Application[]
+}
+
+model Application {
+  id              String        @id @default(uuid())
+  status          String        @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  proposal        String
+  rate            Float
+  campaignId      String
+  influencerId    String
+  userId          String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  campaign        Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  influencer      InfluencerProfile @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Many-to-many relation with users
+  participants    User[]        @relation("UserToConversation")
+  
+  messages        Message[]
+}
+
+model Message {
+  id              String        @id @default(uuid())
+  content         String
+  senderId        String
+  conversationId  String
+  read            Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  sender          User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
